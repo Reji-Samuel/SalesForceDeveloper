@@ -1,0 +1,7 @@
+<aura:component>
+    Hello World ... This is the first Lightning app
+   <button class="slds-button slds-button_outline-brand">Button Outline Brand</button>
+    <button class="slds-button slds-button_brand">Button Brand</button> <br/>
+
+
+</aura:component>

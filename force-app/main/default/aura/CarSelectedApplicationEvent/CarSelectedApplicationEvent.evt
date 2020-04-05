@@ -1,0 +1,3 @@
+<aura:event type="APPLICATION" description="Event template">
+    <aura:attribute type="Car__c" name="car"/>
+</aura:event>

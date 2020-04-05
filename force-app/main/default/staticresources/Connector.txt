@@ -1,0 +1,1136 @@
+/**
+ * This class helps to process all the Integrations, using Continuation.
+ * <p /><p />
+ * @author 
+ */
+public without sharing class IntegrationClass {
+
+    //Public variables.
+    public static final Boolean BOOL_SKIP_ATTACHMENT_GENERATION = false;
+    public static final Integer INTEGER_DEFAULT_TIMEOUT_VALUE_MILLISECONDS = 30000;
+    public static final String STRING_GET_SEPARATOR = '?';
+    public static final String STRING_GET_SEPARATOR_PARAMETER = '&';
+    public static final String STRING_HELPER_URL = Page.IntegrationHelperPage.getUrl() + '?';
+    public static final String STRING_HELPER_PARAMETER_LINKER = 'linker';
+    public static final String STRING_HELPER_PARAMETER_ENDPOINT = 'endpoint';
+    public static final String STRING_HELPER_PARAMETER_REQUEST_BODY = 'requestBody';
+    public static final String STRING_HELPER_PARAMETER_RESPONSE_BODY = 'responseBody';
+    public static final String STRING_HELPER_PARAMETER_NAME_SUFFIX = '=';
+    public static final String STRING_HELPER_PARAMETER_SEPARATOR = '&';
+    public static final String STRING_HELPER_URL_ENCODING = 'UTF-8';
+    public static final String STRING_HELPER_URL_REPLACE_OPEN_KEY = '{';
+    public static final String STRING_HELPER_URL_REPLACE_CLOSE_KEY = '}';
+    public static final String STRING_HELPER_URL_SLASH_SEPARATOR = '/';
+    public static final String STRING_REQUEST_ATTACHMENT_NAME = 'Request.txt';
+    public static final String STRING_RESPONSE_ATTACHMENT_NAME = 'Response.txt';
+    public static final String STRING_DATA_TRIMMED_MESSAGE = 'Data Trimmed by Developer: ';
+    public static final String STRING_AUTHORIZATION_HEADER = 'Authorization';
+    public static final String STRING_BEARER = 'Bearer ';
+    public static final String STRING_AMPERSAND = '&';
+    public static final String STRING_AMPERSAND_REPLACEMENT = '--AND--';
+    public static final Integer INTEGER_URL_LIMIT = 4095;
+    public static final Integer INTEGER_LONG_TEXT_AREA_FIELD_LIMIT = 131072;
+
+    //Private variables.
+    private static Map<String, String> mapStaticReserveKeywords;
+    private static HttpRequest objGeneralHttpRequest;
+    private static List<Attachment> lstAttachments;
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strCallbackMethodName    Method name for the callback.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass continuationCallout(String strEndpointName, String strCallbackMethodName) {
+        return callout(true, strEndpointName, null, null, null, null, null, null, strCallbackMethodName, null);
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strCallbackMethodName    Method name for the callback.
+     * @param strBody    Body of the request.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass continuationCallout(String strEndpointName, String strCallbackMethodName, String strBody) {
+        return callout(true, strEndpointName, strBody, null, null, null, null, null, strCallbackMethodName, null);
+    }
+    /**
+     * Executes the request callout
+     *
+     * @param strEndpointName
+     * @param strCallbackMethodName
+     * @param strURLSuffix
+     * @param strHTTPMethodName
+     *
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass continuationCallout(String strEndpointName, String strCallbackMethodName, String strBody, String strHTTPMethodName) {
+        return callout(true, strEndpointName, strBody, strHTTPMethodName, null, null, null, null, strCallbackMethodName, null);
+    }
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strCallbackMethodName    Method name for the callback.
+     * @param strURLSuffix    Suffix to be appended to the URL.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass continuationCalloutNoParameters(String strEndpointName, String strCallbackMethodName, String strURLSuffix) {
+        return callout(true, strEndpointName, strURLSuffix, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_GET_METHOD, false, null, null, null, strCallbackMethodName, null);
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strCallbackMethodName    Method name for the callback.
+     * @param strBody    Body of the request.
+     * @param boolIsHTTPGetRequest    Defines if the callout requires an HTTP GET or POST action.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass continuationCallout(String strEndpointName, String strCallbackMethodName, String strBody, Boolean boolIsHTTPGetRequest) {
+        if (boolIsHTTPGetRequest) {
+            return callout(true, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_GET_METHOD, null, null, null, null, strCallbackMethodName, null);
+        } else {
+            return callout(true, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_POST_METHOD, null, null, null, null, strCallbackMethodName, null);
+        }
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strCallbackMethodName    Method name for the callback.
+     * @param strBody    Body of the request.
+     * @param boolIsHTTPGetRequest    Defines if the callout requires an HTTP GET or POST action.
+     * @param mapHeaderValues    Header values.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass continuationCallout(String strEndpointName, String strCallbackMethodName, String strBody, Boolean boolIsHTTPGetRequest,
+            Map<String, String> mapHeaderValues) {
+        if (boolIsHTTPGetRequest) {
+            return callout(true, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_GET_METHOD, null, null, mapHeaderValues, null, strCallbackMethodName, null);
+        } else {
+            return callout(true, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_POST_METHOD, null, null, mapHeaderValues, null, strCallbackMethodName, null);
+        }
+
+
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strCallbackMethodName    Method name for the callback.
+     * @param strBody    Body of the request.
+     * @param boolIsHTTPGetRequest    Defines if the callout requires an HTTP GET or POST action.
+     * @param mapHeaderValues    Header values.
+     * @param intTimeout    Timeout value for the callout (in milliseconds).
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass continuationCallout(String strEndpointName, String strCallbackMethodName, String strBody, Boolean boolIsHTTPGetRequest,
+            Map<String, String> mapHeaderValues, Integer intTimeout) {
+        if (boolIsHTTPGetRequest) {
+            return callout(true, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_GET_METHOD, null, intTimeout, mapHeaderValues, null, strCallbackMethodName, null);
+        } else {
+            return callout(true, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_POST_METHOD, null, intTimeout, mapHeaderValues, null, strCallbackMethodName, null);
+        }
+
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strCallbackMethodName    Method name for the callback.
+     * @param mapCallParams    Map with parameters for endpoint.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass continuationCallout(String strEndpointName, String strCallbackMethodName, Map<String, String> mapCallParams) {
+        return callout(true, strEndpointName, null, null, null, null, null, null, strCallbackMethodName, mapCallParams);
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strCallbackMethodName    Method name for the callback.
+     * @param strBody    Body of the request.
+     * @param mapCallParams    Map with parameters for endpoint.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass continuationCallout(String strEndpointName, String strCallbackMethodName, String strBody, Map<String, String> mapCallParams) {
+        return callout(true, strEndpointName, strBody, null, null, null, null, null, strCallbackMethodName, mapCallParams);
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strCallbackMethodName    Method name for the callback.
+     * @param strURLSuffix    Suffix to be appended to the URL.
+     * @param mapCallParams    Map with parameters for endpoint.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass continuationCalloutNoParameters(String strEndpointName, String strCallbackMethodName, String strURLSuffix, Map<String, String> mapCallParams) {
+        return callout(true, strEndpointName, strURLSuffix, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_GET_METHOD, false, null, null, null, strCallbackMethodName, mapCallParams);
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strCallbackMethodName    Method name for the callback.
+     * @param strBody    Body of the request.
+     * @param boolIsHTTPGetRequest    Defines if the callout requires an HTTP GET or POST action.
+     * @param mapHeaderValues    Header values.
+     * @param mapCallParams    Map with parameters for endpoint.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass continuationCallout(String strEndpointName, String strCallbackMethodName, String strBody, Boolean boolIsHTTPGetRequest,
+            Map<String, String> mapHeaderValues, Map<String, String> mapCallParams) {
+        if (boolIsHTTPGetRequest) {
+            return callout(true, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_GET_METHOD, null, null, mapHeaderValues, null, strCallbackMethodName, mapCallParams);
+        } else {
+            return callout(true, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_POST_METHOD, null, null, mapHeaderValues, null, strCallbackMethodName, mapCallParams);
+        }
+
+    }
+
+    /**
+     * Executes the request callout
+     *
+     * @param strEndpointName
+     * @param strCallbackMethodName
+     * @param strURLSuffix
+     * @param strHTTPMethodName
+     *
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass continuationCallout(String strEndpointName, String strCallbackMethodName, String strBody, String strHTTPMethodName,
+            Map<String, String> mapHeaderValues, Map<String, String> mapCallParams) {
+        return callout(true, strEndpointName, strBody, strHTTPMethodName, null, null, mapHeaderValues, null, strCallbackMethodName, mapCallParams);
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strCallbackMethodName    Method name for the callback.
+     * @param strBody    Body of the request.
+     * @param boolIsHTTPGetRequest    Defines if the callout requires an HTTP GET or POST action.
+     * @param mapHeaderValues    Header values.
+     * @param intTimeout    Timeout value for the callout (in milliseconds).
+     * @param mapCallParams    Map with parameters for endpoint.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass continuationCallout(String strEndpointName, String strCallbackMethodName, String strBody, Boolean boolIsHTTPGetRequest,
+            Map<String, String> mapHeaderValues, Integer intTimeout, Map<String, String> mapCallParams) {
+        if (boolIsHTTPGetRequest) {
+            return callout(true, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_GET_METHOD, null, intTimeout, mapHeaderValues, null, strCallbackMethodName, mapCallParams);
+        } else {
+            return callout(true, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_POST_METHOD, null, intTimeout, mapHeaderValues, null, strCallbackMethodName, mapCallParams);
+        }
+
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass synchronousCallout(String strEndpointName) {
+        return callout(false, strEndpointName, null, null, null, null, null, true, null, null);
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strBody    Body of the request.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass synchronousCallout(String strEndpointName, String strBody) {
+        return callout(false, strEndpointName, strBody, null, null, null, null, true, null, null);
+    }
+
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strBody    Body of the request.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass synchronousCallout(String strEndpointName, String strBody, String strHTTPMethodName) {
+        return callout(false, strEndpointName, strBody, strHTTPMethodName, null, null, null, true, null, null);
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strURLSuffix    Suffix to be appended to the URL.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass synchronousCalloutNoParameters(String strEndpointName, String strURLSuffix) {
+        return callout(false, strEndpointName, strURLSuffix, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_GET_METHOD, false, null, null, true, null, null);
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strBody    Body of the request.
+     * @param boolIsHTTPGetRequest    Defines if the callout requires an HTTP GET or POST action.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass synchronousCallout(String strEndpointName, String strBody, Boolean boolIsHTTPGetRequest) {
+        if (boolIsHTTPGetRequest) {
+            return callout(false, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_GET_METHOD, null, null, null, true, null, null);
+        } else {
+            return callout(false, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_POST_METHOD, null, null, null, true, null, null);
+        }
+
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strBody    Body of the request.
+     * @param boolIsHTTPGetRequest    Defines if the callout requires an HTTP GET or POST action.
+     * @param mapHeaderValues    Header values.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass synchronousCallout(String strEndpointName, String strBody, Boolean boolIsHTTPGetRequest, Map<String, String> mapHeaderValues) {
+        if (boolIsHTTPGetRequest) {
+            return callout(false, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_GET_METHOD, null, null, mapHeaderValues, true, null, null);
+        } else {
+            return callout(false, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_POST_METHOD, null, null, mapHeaderValues, true, null, null);
+        }
+
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strBody    Body of the request.
+     * @param boolIsHTTPGetRequest    Defines if the callout requires an HTTP GET or POST action.
+     * @param mapHeaderValues    Header values.
+     * @param boolIncludeQuestionMarkGetMethod    Defines if the ? must be appended to the URL, on a GET callout.
+     * @param intTimeout    Timeout value for the callout (in milliseconds).
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass synchronousCallout(String strEndpointName, String strBody, Boolean boolIsHTTPGetRequest, Map<String, String> mapHeaderValues,
+            Boolean boolIncludeQuestionMarkGetMethod, Integer intTimeout) {
+        if (boolIsHTTPGetRequest) {
+            return callout(false, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_GET_METHOD, boolIncludeQuestionMarkGetMethod, intTimeout, mapHeaderValues, true, null, null);
+        } else {
+            return callout(false, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_POST_METHOD, boolIncludeQuestionMarkGetMethod, intTimeout, mapHeaderValues, true, null, null);
+        }
+
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strBody    Body of the request.
+     * @param boolIsHTTPGetRequest    Defines if the callout requires an HTTP GET or POST action.
+     * @param mapHeaderValues    Header values.
+     * @param intTimeout    Timeout value for the callout (in milliseconds).
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass synchronousCallout(String strEndpointName, String strBody, Boolean boolIsHTTPGetRequest, Map<String, String> mapHeaderValues,
+            Integer intTimeout) {
+        if (boolIsHTTPGetRequest) {
+            return callout(false, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_GET_METHOD, null, intTimeout, mapHeaderValues, true, null, null);
+        } else {
+            return callout(false, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_POST_METHOD, null, intTimeout, mapHeaderValues, true, null, null);
+        }
+
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param mapCallParams    Map with parameters for endpoint.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass synchronousCallout(String strEndpointName, Map<String, String> mapCallParams) {
+        return callout(false, strEndpointName, null, null, null, null, null, true, null, mapCallParams);
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strBody    Body of the request.
+     * @param mapCallParams    Map with parameters for endpoint.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass synchronousCallout(String strEndpointName, String strBody, Map<String, String> mapCallParams) {
+        return callout(false, strEndpointName, strBody, null, null, null, null, true, null, mapCallParams);
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strURLSuffix    Suffix to be appended to the URL.
+     * @param mapCallParams    Map with parameters for endpoint.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass synchronousCalloutNoParameters(String strEndpointName, String strURLSuffix, Map<String, String> mapCallParams) {
+        return callout(false, strEndpointName, strURLSuffix, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_GET_METHOD, null, null, null, true, null, mapCallParams);
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strBody    Body of the request.
+     * @param boolIsHTTPGetRequest    Defines if the callout requires an HTTP GET or POST action.
+     * @param mapHeaderValues    Header values.
+     * @param mapCallParams    Map with parameters for endpoint.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass synchronousCallout(String strEndpointName, String strBody, Boolean boolIsHTTPGetRequest, Map<String, String> mapHeaderValues, Map<String, String> mapCallParams) {
+        if (boolIsHTTPGetRequest) {
+            return callout(false, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_GET_METHOD, null, null, mapHeaderValues, true, null, mapCallParams);
+        } else {
+            return callout(false, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_POST_METHOD, null, null, mapHeaderValues, true, null, mapCallParams);
+        }
+
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strBody    Body of the request.
+     * @param boolIsHTTPGetRequest    Defines if the callout requires an HTTP GET or POST action.
+     * @param mapHeaderValues    Header values.
+     * @param boolIncludeQuestionMarkGetMethod    Defines if the ? must be appended to the URL, on a GET callout.
+     * @param intTimeout    Timeout value for the callout (in milliseconds).
+     * @param mapCallParams    Map with parameters for endpoint.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass synchronousCallout(String strEndpointName, String strBody, Boolean boolIsHTTPGetRequest, Map<String, String> mapHeaderValues,
+            Boolean boolIncludeQuestionMarkGetMethod, Integer intTimeout, Map<String, String> mapCallParams) {
+        if (boolIsHTTPGetRequest) {
+            return callout(false, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_GET_METHOD, boolIncludeQuestionMarkGetMethod, intTimeout, mapHeaderValues, true, null, mapCallParams);
+        } else {
+            return callout(false, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_POST_METHOD, boolIncludeQuestionMarkGetMethod, intTimeout, mapHeaderValues, true, null, mapCallParams);
+        }
+
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strBody    Body of the request.
+     * @param boolIsHTTPGetRequest    Defines if the callout requires an HTTP GET or POST action.
+     * @param mapHeaderValues    Header values.
+     * @param intTimeout    Timeout value for the callout (in milliseconds).
+     * @param mapCallParams    Map with parameters for endpoint.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass synchronousCallout(String strEndpointName, String strBody, Boolean boolIsHTTPGetRequest, Map<String, String> mapHeaderValues,
+            Integer intTimeout, Map<String, String> mapCallParams) {
+        if (boolIsHTTPGetRequest) {
+            return callout(false, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_GET_METHOD, null, intTimeout, mapHeaderValues, true, null, mapCallParams);
+        } else {
+            return callout(false, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_POST_METHOD, null, intTimeout, mapHeaderValues, true, null, mapCallParams);
+        }
+
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass asynchronousCallout(String strEndpointName) {
+        return callout(false, strEndpointName, null, null, null, null, null, false, null, null);
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strBody    Body of the request.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass asynchronousCallout(String strEndpointName, String strBody) {
+        return callout(false, strEndpointName, strBody, null, null, null, null, false, null, null);
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strBody    Body of the request.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass asynchronousCallout(String strEndpointName, String strBody, String strHTTPMethodName) {
+        return callout(false, strEndpointName, strBody, strHTTPMethodName, null, null, null, false, null, null);
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strURLSuffix    Suffix to be appended to the URL.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass asynchronousCalloutNoParameters(String strEndpointName, String strURLSuffix) {
+        return callout(false, strEndpointName, strURLSuffix, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_GET_METHOD, false, null, null, false, null, null);
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strBody    Body of the request.
+     * @param boolIsHTTPGetRequest    Defines if the callout requires an HTTP GET or POST action.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass asynchronousCallout(String strEndpointName, String strBody, Boolean boolIsHTTPGetRequest) {
+        if (boolIsHTTPGetRequest) {
+            return callout(false, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_GET_METHOD, null, null, null, false, null, null);
+        } else {
+            return callout(false, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_POST_METHOD, null, null, null, false, null, null);
+        }
+
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strBody    Body of the request.
+     * @param boolIsHTTPGetRequest    Defines if the callout requires an HTTP GET or POST action.
+     * @param mapHeaderValues    Header values.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass asynchronousCallout(String strEndpointName, String strBody, Boolean boolIsHTTPGetRequest, Map<String, String> mapHeaderValues) {
+        if (boolIsHTTPGetRequest) {
+            return callout(false, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_GET_METHOD, null, null, mapHeaderValues, false, null, null);
+        } else {
+            return callout(false, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_POST_METHOD, null, null, mapHeaderValues, false, null, null);
+        }
+
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strBody    Body of the request.
+     * @param boolIsHTTPGetRequest    Defines if the callout requires an HTTP GET or POST action.
+     * @param mapHeaderValues    Header values.
+     * @param intTimeout    Timeout value for the callout (in milliseconds).
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass asynchronousCallout(String strEndpointName, String strBody, Boolean boolIsHTTPGetRequest, Map<String, String> mapHeaderValues,
+            Integer intTimeout) {
+        if (boolIsHTTPGetRequest) {
+            return callout(false, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_GET_METHOD, null, intTimeout, mapHeaderValues, false, null, null);
+        } else {
+            return callout(false, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_POST_METHOD, null, intTimeout, mapHeaderValues, false, null, null);
+        }
+
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param mapCallParams    Map with parameters for endpoint.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass asynchronousCallout(String strEndpointName, Map<String, String> mapCallParams) {
+        return callout(false, strEndpointName, null, null, null, null, null, false, null, mapCallParams);
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strBody    Body of the request.
+     * @param mapCallParams    Map with parameters for endpoint.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass asynchronousCallout(String strEndpointName, String strBody, Map<String, String> mapCallParams) {
+        return callout(false, strEndpointName, strBody, null, null, null, null, false, null, mapCallParams);
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strURLSuffix    Suffix to be appended to the URL.
+     * @param mapCallParams    Map with parameters for endpoint.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass asynchronousCalloutNoParameters(String strEndpointName, String strURLSuffix, Map<String, String> mapCallParams) {
+        return callout(false, strEndpointName, strURLSuffix, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_GET_METHOD, false, null, null, false, null, mapCallParams);
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strBody    Body of the request.
+     * @param boolIsHTTPGetRequest    Defines if the callout requires an HTTP GET or POST action.
+     * @param mapHeaderValues    Header values.
+     * @param mapCallParams    Map with parameters for endpoint.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass asynchronousCallout(String strEndpointName, String strBody, Map<String, String> mapCallParams, Boolean boolIsHTTPGetRequest,
+            Map<String, String> mapHeaderValues) {
+        if (boolIsHTTPGetRequest) {
+            return callout(false, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_GET_METHOD, null, null, mapHeaderValues, false, null, mapCallParams);
+        } else {
+            return callout(false, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_POST_METHOD, null, null, mapHeaderValues, false, null, mapCallParams);
+        }
+
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strBody    Body of the request.
+     * @param boolIsHTTPGetRequest    Defines if the callout requires an HTTP GET or POST action.
+     * @param mapHeaderValues    Header values.
+     * @param intTimeout    Timeout value for the callout (in milliseconds).
+     * @param mapCallParams    Map with parameters for endpoint.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass asynchronousCallout(String strEndpointName, String strBody, Boolean boolIsHTTPGetRequest, Map<String, String> mapHeaderValues,
+            Integer intTimeout, Map<String, String> mapCallParams) {
+        if (boolIsHTTPGetRequest) {
+            return callout(false, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_GET_METHOD, null, intTimeout, mapHeaderValues, false, null, mapCallParams);
+        } else {
+            return callout(false, strEndpointName, strBody, StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_POST_METHOD, null, intTimeout, mapHeaderValues, false, null, mapCallParams);
+        }
+
+    }
+
+    /**
+     * Extracts the Continuation result.
+     *
+     * @param objIntegration    Integration wrapper object.
+     * @return Integration Wrapper.
+     */
+    public static IntegrationWrapperClass getContinuationResponse(IntegrationWrapperClass objIntegration) {
+        if (objIntegration != null && String.IsNotBlank(objIntegration.strRequestKey)) {
+            HttpResponse objResponse = Continuation.getResponse(objIntegration.strRequestKey);
+            objIntegration.strResponseBody = replaceJSONKeywords(objResponse.getBody());
+            objIntegration.strResponseStatusCode = String.valueOf(objResponse.getStatusCode());
+            fetchResponseHeaders(objResponse, objIntegration);
+
+            //If we want to fetch the data from an stati resource, then we load it here.
+            if (objIntegration.boolFetchLocalData != null && objIntegration.boolFetchLocalData) {
+                for (StaticResource objStaticResource : [SELECT Body FROM StaticResource WHERE Name = :objIntegration.strEndpointLabel LIMIT 1]) {
+                    objIntegration.strResponseBody = replaceJSONKeywords(objStaticResource.body.toString());
+                    objIntegration.strResponseStatusCode = '200';
+                }
+            }
+
+            //Finally, we save the integration details.
+            saveIntegrationDetailsDifferentInstance(objIntegration.strLinker, objIntegration.strRequestEndpoint, objIntegration.strRequestBody, objIntegration.strResponseBody,
+                    objIntegration.strResponseStatusCode);
+        }
+        return objIntegration;
+    }
+
+    /**
+     * Extracts the Result.
+     *
+     * @param strEndpointRecordSerialized    Endpoint URL object serialized.
+     * @param strBody    Body of the request.
+     * @param intTimeout    Timeout value for the callout (in milliseconds).
+     * @param boolIsHTTPGetRequest    Defines if the callout requires an HTTP GET or POST action.
+     * @param boolIncludeQuestionMarkGetMethod    Defines if the ? must be appended to the URL, on a GET callout.
+     * @param strLinker    Linker value for Request and Response.
+     * @param mapHeaderValues    Header values.
+     * @param mapCallParams    Map with parameters for endpoint.
+     */
+    @future(callout = true)
+    public static void futureCallout(String strEndpointRecordSerialized, String strBody, Integer intTimeout, String strHTTPMethodName, Boolean boolIncludeQuestionMarkGetMethod,
+            Map<String, String> mapHeaderValues, String strLinker, Map<String, String> mapCallParams) {
+        String strEndpoint = '';
+        try {
+            IntegrationEndpoint__mdt objEndpointRecord = (IntegrationEndpoint__mdt) JSON.deserialize(strEndpointRecordSerialized, IntegrationEndpoint__mdt.class);
+            strEndpoint = objEndpointRecord.Endpoint__c;
+            HttpRequest objHttpRequest = createHttpRequest(false, objEndpointRecord, strBody, intTimeout, strHTTPMethodName, boolIncludeQuestionMarkGetMethod, mapHeaderValues,
+                    mapCallParams);
+            Http objHttp = new Http();
+            HttpResponse objResponse = objHttp.send(objHttpRequest);
+            saveIntegrationDetailsDifferentInstance(strLinker, strEndpoint, strBody, objResponse.getBody(), String.valueOf(objResponse.getStatusCode()));
+        } catch (CalloutException objException) {
+
+            //Storing first the request.
+            saveIntegrationDetails(strLinker, strEndpoint, strBody, null, null);
+
+            //Now the error log.
+            ErrorLogClass.processException(objException, strEndpointRecordSerialized, strBody);
+        }
+    }
+
+    /**
+     * Stores the Request data for tracking purposes.
+     *
+     * @param strLinker    Linker value for Request and Response.
+     * @param strEndpoint    Endpoint.
+     * @param strRequestBody    Body request.
+     * @param strResponseBody    Body response.
+     * @param strResponseCode    Status Code response.
+     */
+    public static void saveIntegrationDetails(String strLinker, String strEndpoint, String strRequestBody, String strResponseBody, String strResponseCode) {
+        String strUpdatedEndpoint = strEndpoint;
+        IntegrationDetail__c objIntegrationDetails = new IntegrationDetail__c();
+        for (IntegrationDetail__c objExistingRecord : [SELECT LinkerId__c,ExternalId__c, Endpoint__c, RequestBody__c, ResponseBody__c, ResponseCode__c FROM
+                IntegrationDetail__c WHERE LinkerId__c = :strLinker LIMIT 1]) {
+            objIntegrationDetails = objExistingRecord;
+        }
+        objIntegrationDetails.LinkerId__c = strLinker;
+        if (String.IsNotBlank(strUpdatedEndpoint)) {
+            strUpdatedEndpoint = strUpdatedEndpoint.replace(STRING_AMPERSAND_REPLACEMENT, STRING_AMPERSAND);
+            objIntegrationDetails.Endpoint__c = strUpdatedEndpoint.length() > 255 ? strUpdatedEndpoint.substring(0, 244) : strUpdatedEndpoint;
+        }
+
+        //Now preparing the updats.
+        if (String.IsNotBlank(strRequestBody)) {
+            prepareRequestBody(objIntegrationDetails, strRequestBody);
+        }
+        if (String.IsNotBlank(strResponseBody)) {
+            prepareResponseBody(objIntegrationDetails, strResponseBody);
+        }
+        if (String.isNotBlank(strResponseCode)) {
+            objIntegrationDetails.ResponseCode__c = strResponseCode;
+        }
+        upsert objIntegrationDetails LinkerId__c;
+
+    }
+
+    /**
+     * Method to prepare the Request integration details information.
+     *
+     * @param objIntegrationDetails The integration detail object to prepare.
+     * @param strRequestBody The body of the request.
+     * @return objPreparedIntegrationDetails The prepared object with appropriate information.
+     */
+    public static void prepareRequestBody(IntegrationDetail__c objIntegrationDetails, String strRequestBody) {
+        lstAttachments = new List<Attachment>();
+        if (String.IsBlank(objIntegrationDetails.RequestBody__c)) {
+            objIntegrationDetails.RequestBody__c = '';
+        }
+        objIntegrationDetails.RequestBody__c = objIntegrationDetails.RequestBody__c + strRequestBody;
+        if (String.IsNotBlank(objIntegrationDetails.RequestBody__c) && objIntegrationDetails.RequestBody__c.length() > INTEGER_LONG_TEXT_AREA_FIELD_LIMIT) {
+            if (BOOL_SKIP_ATTACHMENT_GENERATION) {
+                objIntegrationDetails.RequestBody__c = STRING_DATA_TRIMMED_MESSAGE + objIntegrationDetails.RequestBody__c;
+                objIntegrationDetails.RequestBody__c = objIntegrationDetails.RequestBody__c.substring(0, INTEGER_LONG_TEXT_AREA_FIELD_LIMIT - 1);
+            } else {
+                Attachment objRequestAttachment = new Attachment();
+                objRequestAttachment.Body = Blob.valueOf(objIntegrationDetails.RequestBody__c);
+                objRequestAttachment.Name = STRING_REQUEST_ATTACHMENT_NAME;
+                lstAttachments.add(objRequestAttachment);
+                objIntegrationDetails.RequestBody__c = 'Please see ' + objRequestAttachment.Name + ' attached file.';
+            }
+        }
+    }
+
+    /**
+     * Method to prepare the Response integration details information.
+     *
+     * @param objIntegrationDetails The integration detail object to prepare.
+     * @param strResponseBody The body of the response.
+     * @return objIntegrationDetails The prepared object with appropriate information.
+     */
+    public static void prepareResponseBody(IntegrationDetail__c objIntegrationDetails, String strResponseBody) {
+        lstAttachments = new List<Attachment>();
+        if (String.IsBlank(objIntegrationDetails.ResponseBody__c)) {
+            objIntegrationDetails.ResponseBody__c = '';
+        }
+        objIntegrationDetails.ResponseBody__c = objIntegrationDetails.ResponseBody__c + strResponseBody;
+        if (String.IsNotBlank(objIntegrationDetails.ResponseBody__c) && objIntegrationDetails.ResponseBody__c.length() > INTEGER_LONG_TEXT_AREA_FIELD_LIMIT) {
+            if (BOOL_SKIP_ATTACHMENT_GENERATION) {
+                objIntegrationDetails.ResponseBody__c = STRING_DATA_TRIMMED_MESSAGE + objIntegrationDetails.ResponseBody__c;
+                objIntegrationDetails.ResponseBody__c = objIntegrationDetails.ResponseBody__c.substring(0, INTEGER_LONG_TEXT_AREA_FIELD_LIMIT - 1);
+            } else {
+                Attachment objResponseAttachment = new Attachment();
+                objResponseAttachment.Body = Blob.valueOf(objIntegrationDetails.ResponseBody__c);
+                objResponseAttachment.Name = STRING_RESPONSE_ATTACHMENT_NAME;
+                lstAttachments.add(objResponseAttachment);
+                objIntegrationDetails.ResponseBody__c = 'Please see ' + objResponseAttachment.Name + ' attached file.';
+            }
+        }
+    }
+
+    /**
+     * Executes the request callout.
+     *
+     * @param boolUseContinuation    Defines if the code will use Continuation to prepare the callout.
+     * @param strEndpointName    Name of the Endpoint stored in the Custom Metadata Type.
+     * @param strBody    Body of the request.
+     * @param boolIsHTTPGetRequest    Defines if the callout requires an HTTP GET or POST action.
+     * @param boolIncludeQuestionMarkGetMethod    Defines if the ? must be appended to the URL, on a GET callout.
+     * @param intTimeout    Timeout value for the callout (in milliseconds).
+     * @param mapHeaderValues    Header values.
+     * @param boolExecuteSynchronously    Defines if the callout should be on a Future method.
+     * @param strCallbackMethodName    Method name for the callback.
+     * @param objContinuation    Continuation instance.
+     * @param mapCallParams    Map with parameters for endpoint.
+     * @return Integration Wrapper.
+     */
+    private static IntegrationWrapperClass callout(Boolean boolUseContinuation, String strEndpointName, String strBody, String strHTTPMethodName,
+            Boolean boolIncludeQuestionMarkGetMethod, Integer intTimeout, Map<String, String> mapHeaderValues, Boolean boolExecuteSynchronously, String strCallbackMethodName,
+            Map<String, String> mapCallParams) {
+        String strLocalHTTPMethodName = strHTTPMethodName;
+        String strLocalBody = strBody;
+        String strLocalEndpointName = strEndpointName;
+        IntegrationWrapperClass objIntegration = new IntegrationWrapperClass();
+        List<IntegrationEndpoint__mdt> lstIntegrationEndpoints;
+        try {
+            if (String.IsNotBlank(strLocalEndpointName)) {
+                String strOrganizationId = UserInfo.getOrganizationId();
+                if (Test.isRunningTest()) {
+                    strOrganizationId = 'Default';
+                }
+                lstIntegrationEndpoints = [
+                        SELECT Endpoint__c, AuthenticationToken__c, IsLocalData__c
+                        FROM IntegrationEndpoint__mdt
+                        WHERE
+                        MasterLabel = :strLocalEndpointName AND Environment__r.Id__c = :strOrganizationId AND   Is_Active__c= true AND
+                        Environment__r.Is_Active__c = true
+                        LIMIT 1
+                ];
+
+                //Now we save the Label name for future references.
+                objIntegration.strEndpointLabel = strLocalEndpointName;
+
+                //We first get the right endpoint, based on the current Environment.
+                if (lstIntegrationEndpoints != null && !lstIntegrationEndpoints.isEmpty()) {
+                    objIntegration.boolFetchLocalData = lstIntegrationEndpoints[0].IsLocalData__c;
+                    Integer intLocalTimeout = intTimeout;
+
+                    //Setting the values for request/response tracking.
+                    if (strLocalBody == null) {
+                        strLocalBody = '';
+                    }
+                    objIntegration.strLinker = Userinfo.getUserId() + DateTime.now() + ':' + DateTime.now().millisecond();
+
+                    //Now we create the HTTP Request object.
+                    objGeneralHttpRequest = createHttpRequest(boolUseContinuation, lstIntegrationEndpoints[0], strLocalBody, intLocalTimeout, strLocalHTTPMethodName,
+                            boolIncludeQuestionMarkGetMethod, mapHeaderValues, mapCallParams);
+
+                    //If the developer wants to use continuation.
+                    if (boolUseContinuation == null || boolUseContinuation) {
+                        if (intLocalTimeout == null) {
+                            intLocalTimeout = INTEGER_DEFAULT_TIMEOUT_VALUE_MILLISECONDS;
+                        }
+
+                        //First, we convert the provided milliseconds to seconds.
+                        intLocalTimeout = intLocalTimeout / 1000;
+
+                        //Finally, we set the values for the Continuation method.
+                        objIntegration.intTimeout = intLocalTimeout;
+                        objIntegration.strCallbackMethodName = strCallbackMethodName;
+                        objIntegration.strRequestMethod = objGeneralHttpRequest.getMethod();
+                        objIntegration.strRequestBody = objGeneralHttpRequest.getBody();
+                        objIntegration.strRequestEndpoint = objGeneralHttpRequest.getEndpoint();
+                        objIntegration.mapHeaderValues = mapHeaderValues;
+                    } else {
+
+                        //If the developer needs to execute the callout synchronously.
+                        if (boolExecuteSynchronously == null || boolExecuteSynchronously) {
+                            strLocalEndpointName = lstIntegrationEndpoints[0].Endpoint__c;
+                            Http objHttp = new Http();
+                            HttpResponse objResponse = objHttp.send(objGeneralHttpRequest);
+                            objIntegration.strResponseBody = replaceJSONKeywords(objResponse.getBody());
+                            objIntegration.strResponseStatusCode = String.valueOf(objResponse.getStatusCode());
+                            fetchResponseHeaders(objResponse, objIntegration);
+                            saveIntegrationDetailsDifferentInstance(objIntegration.strLinker, strLocalEndpointName, strLocalBody, objIntegration.strResponseBody,
+                                    objIntegration.strResponseStatusCode);
+                        } else {
+                            futureCallout(JSON.serialize(lstIntegrationEndpoints[0]), strLocalBody, intLocalTimeout, strLocalHTTPMethodName, boolIncludeQuestionMarkGetMethod, mapHeaderValues,
+                                    objIntegration.strLinker, mapCallParams);
+                        }
+                    }
+                }
+            }
+        } catch (CalloutException objInternalException) {
+            ErrorLogWrapperClass objErrorWrapper = ErrorLogClass.processException(objInternalException, objIntegration, strLocalBody);
+            objIntegration.strErrorMessage = objErrorWrapper.strErrorMessage;
+        }
+        return objIntegration;
+    }
+
+    /**
+     * Sets the response headers on IntegrationWrapperClass_CF.
+     *
+     * @param objResponse The response object from callout.
+     * @param objIntegration IntegrationWrapperClass_CF object.
+     */
+    private static void fetchResponseHeaders(HttpResponse objResponse, IntegrationWrapperClass objIntegration) {
+        if (objResponse != null && objIntegration != null) {
+            List<String> lstResponseHeaderKeys = objResponse.getHeaderKeys();
+            Map<String, String> mapResponseHeaderValues = new Map<String, String>();
+            if (lstResponseHeaderKeys != null && !lstResponseHeaderKeys.isEmpty()) {
+                for (String strHeaderKey : lstResponseHeaderKeys) {
+                    mapResponseHeaderValues.put(strHeaderKey, objResponse.getHeader(strHeaderKey));
+                }
+            }
+            objIntegration.mapResponseHeaderValues = mapResponseHeaderValues;
+        }
+    }
+
+    /**
+     * Extracts the Result.
+     *
+     * @param boolUseContinuation    Defines if the code will use Continuation to prepare the callout.
+     * @param objEndpointRecord    Endpoint URL object.
+     * @param strBody    Body of the request.
+     * @param intTimeout    Timeout value for the callout (in milliseconds).
+     * @param boolIsHTTPGetRequest    Defines if the callout requires an HTTP GET or POST action.
+     * @param boolIncludeQuestionMarkGetMethod    Defines if the ? must be appended to the URL, on a GET callout.
+     * @param mapHeaderValues    Header values.
+     * @param mapCallParams    Map with parameters for endpoint.
+     * @return Http Request object.
+     */
+    private static HttpRequest createHttpRequest(Boolean boolUseContinuation, IntegrationEndpoint__mdt objEndpointRecord, String strBody, Integer intTimeout,
+            String strHTTPMethodName, Boolean boolIncludeQuestionMarkGetMethod, Map<String, String> mapHeaderValues, Map<String, String> mapCallParams) {
+        HttpRequest objHttpRequest = new HttpRequest();
+
+        Map<String, String> mapHeaderVals = new Map<String, String>();
+        if (mapHeaderValues != null) {
+            mapHeaderVals.putAll(mapHeaderValues);
+        }
+        String strOrganizationId = UserInfo.getOrganizationId();
+        Environment__mdt objEnv = [Select Client_ID__c, Client_Secret__c from Environment__mdt where Id__c = :strOrganizationId];
+        if (objEnv != null && String.IsNotBlank(objEnv.Client_ID__c) && String.isNotBlank(objEnv.Client_Secret__c)) {
+            if (!mapHeaderVals.containsKey(StaticVariablesClass.STRING_OAUTH_CLIENTID)) {
+                mapHeaderVals.put(StaticVariablesClass.STRING_OAUTH_CLIENTID, objEnv.Client_ID__c);
+            }
+            if (!mapHeaderVals.containsKey(StaticVariablesClass.STRING_OAUTH_CLIENTSECRET)) {
+                mapHeaderVals.put(StaticVariablesClass.STRING_OAUTH_CLIENTSECRET, objEnv.Client_Secret__c);
+            }
+        }
+
+        if (objEndpointRecord != null) {
+            String strEndpointURL = objEndpointRecord.Endpoint__c;
+            if (strHTTPMethodName == null || strHTTPMethodName == StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_GET_METHOD) {
+
+                //We create the GET request.
+                objHttpRequest.setMethod(StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_GET_METHOD);
+                strEndpointURL = setGetParameters(objEndpointRecord, strBody, boolIncludeQuestionMarkGetMethod, mapCallParams, strHTTPMethodName);
+            } else {
+
+                strEndpointURL = setGetParameters(objEndpointRecord, strBody, boolIncludeQuestionMarkGetMethod, mapCallParams, strHTTPMethodName);
+                //We create the POST request.
+                setPostParameters(objHttpRequest, strBody, strHTTPMethodName);
+            }
+            objHttpRequest.setEndpoint(strEndpointURL);
+
+            //If we need to retrieve local data, for Continuation, we set an invalid URL, so the response gets faster to us, and we don't need to change the code structure.
+            if (objEndpointRecord.IsLocalData__c != null && objEndpointRecord.IsLocalData__c) {
+                objHttpRequest.setEndpoint(strEndpointURL + '/bad');
+            }
+
+            //Now we set the headers.
+            setHeaders(objHttpRequest, mapHeaderVals);
+
+            //Finally, we set the Continuation parameters.
+            setContinuationParameters(objHttpRequest, boolUseContinuation, intTimeout);
+        }
+        return objHttpRequest;
+    }
+
+    /**
+     * Stores the Request data for tracking purposes, using an external VFP.
+     *
+     * @param strLinker    Linker value for Request and Response.
+     * @param strEndpoint    Endpoint.
+     * @param strRequestBody    Body request.
+     * @param strResponseBody    Body response.
+     * @param strResponseCode    Status Code response.
+     */
+    public static void saveIntegrationDetailsDifferentInstance(String strLinker, String strEndpoint, String strRequestBody, String strResponseBody, String strResponseCode) {
+        String strUpdatedEndpoint = strEndpoint;
+        try {
+            Integer intRootDomainSize = URL.getSalesforceBaseUrl().toExternalForm().length();
+            strUpdatedEndpoint = strUpdatedEndpoint.replace(STRING_AMPERSAND, STRING_AMPERSAND_REPLACEMENT);
+            String strCompleteRequestURL = STRING_HELPER_URL +
+                    STRING_HELPER_PARAMETER_ENDPOINT + STRING_HELPER_PARAMETER_NAME_SUFFIX + strUpdatedEndpoint + STRING_HELPER_PARAMETER_SEPARATOR +
+                    STRING_HELPER_PARAMETER_LINKER + STRING_HELPER_PARAMETER_NAME_SUFFIX + strLinker + STRING_HELPER_PARAMETER_SEPARATOR +
+                    STRING_HELPER_PARAMETER_REQUEST_BODY + STRING_HELPER_PARAMETER_NAME_SUFFIX + EncodingUtil.urlEncode(strRequestBody, STRING_HELPER_URL_ENCODING) +
+                    STRING_HELPER_PARAMETER_SEPARATOR + STRING_HELPER_PARAMETER_RESPONSE_BODY + STRING_HELPER_PARAMETER_NAME_SUFFIX +
+                    EncodingUtil.urlEncode(strResponseBody, STRING_HELPER_URL_ENCODING);
+            if ((intRootDomainSize + strCompleteRequestURL.length()) > INTEGER_URL_LIMIT) {
+                String strRequestURL = STRING_HELPER_URL +
+                        STRING_HELPER_PARAMETER_ENDPOINT + STRING_HELPER_PARAMETER_NAME_SUFFIX + strUpdatedEndpoint + STRING_HELPER_PARAMETER_SEPARATOR +
+                        STRING_HELPER_PARAMETER_LINKER + STRING_HELPER_PARAMETER_NAME_SUFFIX + strLinker + STRING_HELPER_PARAMETER_SEPARATOR +
+                        STRING_HELPER_PARAMETER_REQUEST_BODY + STRING_HELPER_PARAMETER_NAME_SUFFIX + EncodingUtil.urlEncode(strRequestBody, STRING_HELPER_URL_ENCODING);
+                String strResponseURL = STRING_HELPER_URL +
+                        STRING_HELPER_PARAMETER_ENDPOINT + STRING_HELPER_PARAMETER_NAME_SUFFIX + strUpdatedEndpoint + STRING_HELPER_PARAMETER_SEPARATOR +
+                        STRING_HELPER_PARAMETER_LINKER + STRING_HELPER_PARAMETER_NAME_SUFFIX + strLinker + STRING_HELPER_PARAMETER_SEPARATOR +
+                        STRING_HELPER_PARAMETER_RESPONSE_BODY + STRING_HELPER_PARAMETER_NAME_SUFFIX + EncodingUtil.urlEncode(strResponseBody, STRING_HELPER_URL_ENCODING);
+                if ((intRootDomainSize + strRequestURL.length()) > INTEGER_URL_LIMIT) {
+                    strRequestURL = strRequestURL.substring(0, INTEGER_URL_LIMIT - 24);
+                }
+                if ((intRootDomainSize + strResponseURL.length()) > INTEGER_URL_LIMIT && strResponseURL.length() > INTEGER_URL_LIMIT) {
+                    strResponseURL = strResponseURL.substring(0, INTEGER_URL_LIMIT - 1);
+                }
+                try {
+                    new PageReference(strRequestURL).getContent();
+                } catch (VisualforceException objInternalException) {
+                    saveIntegrationDetails(strLinker, strUpdatedEndpoint, strRequestBody, null, strResponseCode);
+                }
+                try {
+                    new PageReference(strResponseURL).getContent();
+                } catch (VisualforceException objInternalException) {
+                    saveIntegrationDetails(strLinker, strUpdatedEndpoint, null, strResponseBody, strResponseCode);
+                }
+            } else {
+                new PageReference(strCompleteRequestURL).getContent();
+            }
+        } catch (VisualforceException objInternalException) {
+            saveIntegrationDetails(strLinker, strUpdatedEndpoint, strRequestBody, strResponseBody, strResponseCode);
+        }
+    }
+
+    /**
+     * Creates the GET request.
+     *
+     * @param objEndpointRecord    Endpoint URL object.
+     * @param strBody    Body of the request.
+     * @param boolIncludeQuestionMarkGetMethod    Defines if the ? must be appended to the URL, on a GET callout.
+     * @param mapCallParams    Map with parameters for endpoint.
+     * @return Endpoint.
+     */
+    private static String setGetParameters(IntegrationEndpoint__mdt objEndpointRecord, String strBody, Boolean boolIncludeQuestionMarkGetMethod,
+            Map<String, String> mapCallParams, String strHTTPMethodName) {
+        String strParameter;
+        String strEndpointURL = objEndpointRecord.Endpoint__c;
+        if (mapCallParams != null && !mapCallParams.isEmpty() && String.IsNotBlank(strEndpointURL)) {
+            for (String strParameterName : mapCallParams.keySet()) {
+                strParameter = mapCallParams.get(strParameterName);
+                if(String.IsBlank(strParameter)) {
+                    strParameter = '';
+                }
+                strEndpointURL = strEndpointURL.replace(STRING_HELPER_URL_REPLACE_OPEN_KEY + strParameterName + STRING_HELPER_URL_REPLACE_CLOSE_KEY, strParameter);
+            }
+        }
+        if (strHTTPMethodName == null || strHTTPMethodName == StaticVariablesClass.CUSTOM_FRAMEWORK_HTTP_GET_METHOD) {
+            if (String.IsNotBlank(strBody)) {
+                if (boolIncludeQuestionMarkGetMethod == null || boolIncludeQuestionMarkGetMethod) {
+                    strEndpointURL += STRING_GET_SEPARATOR;
+                }
+                strEndpointURL = strEndpointURL + strBody;
+                if (String.IsNotBlank(objEndpointRecord.AuthenticationToken__c)) {
+                    strEndpointURL += STRING_GET_SEPARATOR_PARAMETER + objEndpointRecord.AuthenticationToken__c;
+                }
+            } else if (String.IsNotBlank(objEndpointRecord.AuthenticationToken__c)) {
+                strEndpointURL += STRING_GET_SEPARATOR + objEndpointRecord.AuthenticationToken__c;
+            }
+        }
+        return strEndpointURL;
+    }
+
+    /**
+     * Creates the POST request.
+     *
+     * @param objHttpRequest    HTTP Request.
+     * @param strBody    Body of the request.
+     */
+    private static void setPostParameters(HttpRequest objHttpRequest, String strBody, String strHTTPMethodName) {
+        objHttpRequest.setMethod(strHTTPMethodName);
+        if (String.IsNotBlank(strBody)) {
+            objHttpRequest.setBody(strBody);
+        }
+    }
+
+    /**
+     * Sets the Headers to the Request.
+     *
+     * @param objHttpRequest    HTTP Request.
+     * @param mapHeaderValues    Header values.
+     */
+    private static void setHeaders(HttpRequest objHttpRequest, Map<String, String> mapHeaderValues) {
+        if (mapHeaderValues != null) {
+            for (String strKey : mapHeaderValues.keySet()) {
+                objHttpRequest.setHeader(strKey, mapHeaderValues.get(strKey));
+            }
+        }
+    }
+
+    /**
+     * Creates the Continuation request.
+     *
+     * @param objHttpRequest    HTTP Request.
+     * @param boolUseContinuation    Defines if the code will use Continuation to prepare the callout.
+     * @param intTimeout    Timeout value for the callout (in milliseconds).
+     */
+    private static void setContinuationParameters(HttpRequest objHttpRequest, Boolean boolUseContinuation, Integer intTimeout) {
+        if (boolUseContinuation != null && !boolUseContinuation) {
+            Integer intLocalTimeout = intTimeout;
+            if (intLocalTimeout == null) {
+                intLocalTimeout = INTEGER_DEFAULT_TIMEOUT_VALUE_MILLISECONDS;
+            }
+            objHttpRequest.setTimeout(intLocalTimeout);
+        }
+    }
+
+    /**
+    *
+    * Replaces Salesforce keywords in JSON Response string
+    *
+    * @param strJsonResponse   JSON Response
+    *
+    * @return strJson returns updated JSON Response
+    */
+    public static String replaceJSONKeywords(String strJsonResponse) {
+
+        String strJson = StaticVariablesClass.STRING_BLANK;
+        Map<String, String> mapReserveKeywordFromMetadata = fetchReserveKeywords();
+        try {
+            strJson = new JSONReservedSerializer(JSON.deserializeUntyped(strJsonResponse), mapReserveKeywordFromMetadata).convertToString();
+        } catch (JSONException objJsonException) {
+            ErrorLogClass.processException(objJsonException);
+            strJson = strJsonResponse;
+        }
+        return strJson;
+    }
+
+    /**
+     * Fetches Reserved keywords from Org.
+     *
+     * @return Map<String, String> MasterLabel, Developer from the Reserved words
+     */
+    private static Map<String, String> fetchReserveKeywords() {
+        if (mapStaticReserveKeywords == null) {
+            mapStaticReserveKeywords = new Map<String, String>();
+            List<ReserveKeyword__mdt> lstReserveKeywordFromOrg = [SELECT MasterLabel,DeveloperName FROM ReserveKeyword__mdt WHERE Active__c = true];
+            for (ReserveKeyword__mdt objReserveKeyword : lstReserveKeywordFromOrg) {
+                mapStaticReserveKeywords.put(objReserveKeyword.MasterLabel, objReserveKeyword.DeveloperName);
+            }
+            return mapStaticReserveKeywords;
+        } else {
+            return mapStaticReserveKeywords;
+        }
+    }
+}

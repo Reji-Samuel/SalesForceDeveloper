@@ -1,0 +1,6 @@
+<aura:component controller="checkValidWebsite" implements="flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,lightning:actionOverride">
+	<aura:attribute name="recordId" type="Id" />
+    <aura:attribute name="TheWebSite" type="String"/>
+	 <lightning:button  variant="brand" label="I will check something " onclick="{! c.handleClick }" />
+    
+</aura:component>

@@ -1,0 +1,6 @@
+<aura:component >
+<aura:attribute name="cartItem" type="Object"/>	
+    <div class="slds-p-around_small">
+    {!v.cartItem.Name}
+    </div>
+</aura:component>

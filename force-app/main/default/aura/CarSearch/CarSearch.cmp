@@ -1,0 +1,11 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes">
+    <aura:handler name="searchFormEvent" event="c:SearchFormSubmitEvent" action="{!c.doFormSubmit}" />
+    
+    <lightning:card title="Search your car" class="bottom-margin">
+        <c:CarSearchForm/>
+    </lightning:card>
+    
+        <lightning:card title="Matching Results...!" class="bottom-margin">
+        <c:CarSearchResult aura:id="carSearchResult"/>
+    </lightning:card>
+</aura:component>

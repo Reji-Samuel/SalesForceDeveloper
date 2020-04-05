@@ -1,0 +1,48 @@
+<aura:component implements="lightning:isUrlAddressable" controller="CartDetailsAuraServices">
+    <aura:attribute name="cartItemList" type="Object"/>
+    <lightning:navigation aura:id="navigation"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <div class="c-container">
+    <lightning:layout multipleRows="true">
+        <lightning:layoutItem padding="around-small" size="12">
+        <div class="page-section page-header">
+            <h2> Beer Explorer</h2>
+            </div>
+        </lightning:layoutItem>
+        <lightning:layoutItem padding="around-small" size="12">
+        <lightning:layout>
+            <lightning:layoutItem padding="around-small" size="9">
+            <div class="page-section page-main">
+                <h2 class="slds-text-title_caps">
+                    SHOPPING CART ({!v.cartItemList.length})
+                </h2>
+                <aura:if isTrue="{!v.cartItemList.length > 0}">
+                    <aura:iteration items="{!v.cartItemList.length}" var="item">
+                        <c:CartItem cartItem="{!item}"/>
+                    </aura:iteration>
+                    <aura:set attribute="else">
+                        <img src="{!$Resource.empty_cart}" class="slds-align_absolute-center"/><br/>
+                        <a href="JavaScript:void(0);" class="slds-align_absolute-center" onclick="{!c.homePage}">Click here to Add Items</a>
+    
+                    </aura:set>
+                </aura:if>
+                </div>
+            </lightning:layoutItem>
+            <lightning:layoutItem padding="around-small" size="9">
+            <div class="page-section page-right">
+                <h2>Frequently Purchased</h2>
+                <p>
+                </p>
+                </div>
+            </lightning:layoutItem>
+
+            </lightning:layout>
+        </lightning:layoutItem> 
+                    <lightning:layoutItem flexibility="auto" padding="around-small" size="12">
+        <div class="page-footer page-section">
+            <h2> Beer Explorer</h2>
+            </div>
+            </lightning:layoutItem>
+        </lightning:layout>
+    </div>
+</aura:component>

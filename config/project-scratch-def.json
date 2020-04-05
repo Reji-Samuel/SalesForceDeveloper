@@ -1,0 +1,19 @@
+{
+  "orgName": "LWC",
+  "edition": "Enterprise",
+  "features": ["Communities", "ServiceCloud"],
+  "settings": {
+      "orgPreferenceSettings": {
+          "networksEnabled": true      
+      },
+      "mobileSettings": {
+          "enableS1EncryptedStoragePref2": true
+      },
+      "omniChannelSettings": {
+          "enableOmniChannel": true
+      },
+      "caseSettings": {
+          "systemUserEmail": "rejiisamuel@gmail.com"
+      }
+  }
+}

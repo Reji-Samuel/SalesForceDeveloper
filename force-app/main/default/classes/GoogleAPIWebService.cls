@@ -43,7 +43,7 @@ request.setEndpoint(URL);
 request.setMethod('GET');
 HttpResponse response = http.send(request);
 Integer responseCode=response.getStatusCode();
-System.debug(responseCode);
+//System.debug(responseCode);
 // If the request is successful, parse the JSON response.
 if (response.getStatusCode() == 200) {
 JSONParser parser=JSON.createParser(response.getBody());

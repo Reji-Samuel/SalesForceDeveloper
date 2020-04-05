@@ -30,7 +30,6 @@ export default class SimpleCalculator extends LightningElement {
     this.result = parseInt(this.num1) / parseInt(this.num2);
     this.previousResult.push(this.result);
   }
-  //Comment for multipliction
   handleMultiClick() {
     // eslint-disable-next-line radix
     this.result = parseInt(this.num1) * parseInt(this.num2);
